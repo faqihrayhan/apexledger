@@ -1,0 +1,61 @@
+name: Feature request
+description: Suggest a new capability or improvement.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Start with a short proposal here. If the idea grows into a
+        full scope, it will be promoted to a PRD / expansion module
+        and tracked separately.
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      description: Which area should this improve?
+      options:
+        - Setup, Auth & System
+        - General Ledger & Chart of Accounts
+        - AI Assistant (Community)
+        - M2 — Payroll & Tax (BPJS / TER)
+        - M3 — Inventory, BOM & Work Orders
+        - M4 — Sales, Delivery & AR
+        - M4A — Sales Return / Credit Note
+        - M5 — Procurement & AP (Approvals)
+        - M5A — Purchase Return & Landed Cost
+        - M6 — Treasury, Kasbon & Cash Forecast
+        - M7 — Fixed Assets
+        - M8 — Budgeting & Analytics
+        - CLI, Backup & Update Checker
+        - Licensing (Enterprise)
+        - Frontend (React / Vite)
+        - Deployment & Infrastructure
+        - Documentation
+        - Other / Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Is your request related to a problem? Describe it.
+      placeholder: I'm always frustrated when [...]
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workaround or different approach you have tried or rejected.
+  - type: input
+    id: prd-ref
+    attributes:
+      label: PRD / spec reference (optional)
+      description: Link or section number if this is already scoped somewhere.

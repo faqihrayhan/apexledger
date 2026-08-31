@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend — ruff + pytest (PostgreSQL 15)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: apexledger
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check app tests cli.py
+
+      - name: Test (pytest)
+        run: python -m pytest tests/ -q
+        env:
+          APEX_JWT_SECRET: ci-secret
+          APEX_DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/apexledger_test
+
+  readme-freshness:
+    name: README freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify README mentions recent changes
+        run: |
+          set -euo pipefail
+          if [ "${{ contains(github.event.head_commit.message, '[skip-readme]') }}" = "true" ]; then
+            echo "Commit marked [skip-readme] — skipping freshness check."
+            exit 0
+          fi
+          # Collect changed files in this push (top 400, PRs use the merge window).
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="origin/${{ github.base_ref }}"
+            CHANGED=$(git diff --name-only "${BASE}...HEAD" | head -400)
+          else
+            BEFORE="${{ github.event.before }}"
+            AFTER="${{ github.sha }}"
+            # First push of a new branch: event.before is all-zeros.
+            case "$BEFORE" in
+              0000000000000000000000000000000000000000) CHANGED=$(git diff --name-only "${AFTER}^!" 2>/dev/null || echo "$AFTER") ;;
+              *) CHANGED=$(git diff --name-only "$BEFORE" "$AFTER" | head -400) ;;
+            esac
+          fi
+          echo "Changed files:"
+          echo "$CHANGED"
+          # Only meaningful when code/docs change (not workflow/issue templates).
+          CODE_CHANGED=$(echo "$CHANGED" | grep -E '\.(py|ts|tsx|sql)$|alembic/|^app/|^backend/app/|^frontend/src/' || true)
+          if [ -z "$CODE_CHANGED" ]; then
+            echo "No code files changed — skipping."
+            exit 0
+          fi
+          # The guard: code changed but README did not -> fail.
+          README_CHANGED=$(echo "$CHANGED" | grep -E '^README\.md$' || true)
+          if [ -z "$README_CHANGED" ]; then
+            echo "::error::Code changed but README.md was not updated in this commit."
+            echo "::error::Update README.md to reflect the change, or add [skip-readme] to the commit message."
+            exit 1
+          fi
+          echo "README updated alongside code changes — OK."
+
+  frontend:
+    name: Frontend — eslint + tsc + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (eslint)
+        run: npm run lint
+
+      - name: Type check (tsc)
+        run: npx tsc -b --noEmit
+
+      - name: Build (vite)
+        run: npm run build

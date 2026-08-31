@@ -1,0 +1,122 @@
+name: Bug report
+description: Report something that is not working as expected.
+labels: ["bug"]
+title: "[bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report.
+
+        **Before posting:** do not include credentials of any kind
+        (database passwords, JWT secrets, license keys, customer data).
+        Redact logs before pasting them.
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      description: Which part of ApexLedger is affected?
+      options:
+        - Setup, Auth & System
+        - General Ledger & Chart of Accounts
+        - AI Assistant (Community)
+        - M2 — Payroll & Tax (BPJS / TER)
+        - M3 — Inventory, BOM & Work Orders
+        - M4 — Sales, Delivery & AR
+        - M4A — Sales Return / Credit Note
+        - M5 — Procurement & AP (Approvals)
+        - M5A — Purchase Return & Landed Cost
+        - M6 — Treasury, Kasbon & Cash Forecast
+        - M7 — Fixed Assets
+        - M8 — Budgeting & Analytics
+        - CLI, Backup & Update Checker
+        - Licensing (Enterprise)
+        - Frontend (React / Vite)
+        - Deployment & Infrastructure
+        - Documentation
+        - Other / Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Click '...'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / API response
+      description: >-
+        Redact secrets before pasting. Backend errors surface as
+        UNAUTHENTICATED (401), FORBIDDEN_* (403) or business
+        error codes (409/422).
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: ApexLedger version / commit
+      description: Release tag, version, or commit SHA.
+      placeholder: e.g. 0.3.0 or a1b2c3d
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: How do you run ApexLedger?
+      options:
+        - Source (uvicorn / npm run dev)
+        - Frozen binary (PyInstaller)
+        - Docker / self-hosted service
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: app-mode
+    attributes:
+      label: App mode
+      options:
+        - personal (community)
+        - enterprise
+    validations:
+      required: true
+  - type: dropdown
+    id: ai-mode
+    attributes:
+      label: AI mode
+      options:
+        - disabled (default)
+        - byok (own API key)
+        - local (Ollama)
+        - turnkey
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - WSL2 (Windows)
+        - macOS
+        - Windows (native)
+        - Other
+  - type: input
+    id: postgres
+    attributes:
+      label: PostgreSQL version
+      placeholder: e.g. 15.8
