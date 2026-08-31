@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ApexLedger — On-Premise Accounting, AI-Native</title>
+  <meta name="description" content="Open-core, on-premise accounting platform with a database-enforced double-entry engine and an optional AI assistant. Your financial data never leaves your machine." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="#top">
+      <span class="brand-mark">A</span>
+      <span>ApexLedger</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#security">Security</a>
+      <a href="#editions">Editions</a>
+      <a href="#install">Install</a>
+      <a class="nav-cta" href="https://github.com/faqihrayhan/apexledger">GitHub</a>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="hero-inner">
+      <p class="eyebrow">Open-Core &middot; On-Premise &middot; AI-Native</p>
+      <h1>Accounting that lives<br />on <span class="accent">your</span> machine.</h1>
+      <p class="lede">
+        ApexLedger enforces double-entry integrity inside PostgreSQL — not in
+        application code. Post journals, close periods, and read reports with
+        an optional AI assistant. No cloud. No data leaves the host.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#install">Get Started</a>
+        <a class="btn btn-ghost" href="https://github.com/faqihrayhan/apexledger">View Source</a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>100%</strong><span>Local-first data</span></div>
+        <div><strong>0</strong><span>Rows lost to ledger edits</span></div>
+        <div><strong>14/14</strong><span>Integration tests passing</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="section" id="features">
+    <h2>Built like a vault, runs like a tool.</h2>
+    <div class="grid">
+      <article class="card">
+        <h3>Database-enforced double entry</h3>
+        <p>Balance validation, posting, reversals, and period closes are PL/pgSQL functions. The engine refuses unbalanced entries at the storage layer — no application bug can corrupt the books.</p>
+      </article>
+      <article class="card">
+        <h3>Immutable ledger</h3>
+        <p>UPDATE and DELETE privileges on journal tables are revoked at the database level. Corrections happen through reversing entries, preserving the full audit trail forever.</p>
+      </article>
+      <article class="card">
+        <h3>Optional AI assistant</h3>
+        <p>Bring your own key (OpenAI) or run a local model (Ollama). The assistant records transactions through the same secured RPCs — it can never leave your entity or bypass role checks.</p>
+      </article>
+      <article class="card">
+        <h3>Fast, dense UI</h3>
+        <p>A dark, keyboard-first interface with virtualized journals for thousands of rows, live debit/credit balance indicators, and a trial balance that proves itself.</p>
+      </article>
+      <article class="card">
+        <h3>One-command setup</h3>
+        <p><code>apexledger init</code> prepares the container, database, and migrations. A first-boot wizard creates your entity, admin, and fiscal calendar — no manual SQL.</p>
+      </article>
+      <article class="card">
+        <h3>Auto-backup before anything</h3>
+        <p><code>apexledger backup</code> dumps a timestamped, gzipped snapshot. Updates are opt-in and never install themselves.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="security">
+    <h2>Security model</h2>
+    <div class="security-cols">
+      <div>
+        <h3>Row-Level Security</h3>
+        <p>Every table is entity-scoped. JWT claims are injected into the PostgreSQL session so policies evaluate the caller without trusting the application.</p>
+      </div>
+      <div>
+        <h3>Dual-layer defense</h3>
+        <p>Read endpoints filter by entity again at the application layer. Isolation holds even if a connection bypasses RLS.</p>
+      </div>
+      <div>
+        <h3>Roles in the engine</h3>
+        <p>Only finance roles can create or post journals — checked inside the database function, not just the API.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="editions">
+    <h2>Editions</h2>
+    <div class="editions">
+      <article class="edition">
+        <h3>Community</h3>
+        <p class="price">Free</p>
+        <ul>
+          <li>Full core accounting (GL, CoA, trial balance)</li>
+          <li>Local JWT auth &amp; multi-user roles</li>
+          <li>AI assistant via your own keys</li>
+          <li>Desktop &amp; CLI packaging</li>
+        </ul>
+      </article>
+      <article class="edition edition-featured">
+        <h3>Enterprise</h3>
+        <p class="price">Subscription</p>
+        <ul>
+          <li>Everything in Community</li>
+          <li>Turnkey AI gateway (no key setup)</li>
+          <li>Cloud portal &amp; consolidated reporting</li>
+          <li>Auto-updater with remote maintenance SLA</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="install">
+    <h2>Install</h2>
+    <p class="lede-small">Community edition runs entirely on one machine with Docker and Python 3.11+.</p>
+    <div class="terminal">
+      <div class="term-bar"><span></span><span></span><span></span></div>
+      <pre><code>git clone https://github.com/faqihrayhan/apexledger.git
+cd apexledger/backend
+python -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+
+python cli.py init     # container + database + migrations
+python cli.py serve    # API on :8000 — open http://localhost:8000/docs</code></pre>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>ApexLedger — open-core accounting. Core engine under an open license; Enterprise add-ons by subscription.</p>
+    <p><a href="https://github.com/faqihrayhan/apexledger">GitHub</a></p>
+  </footer>
+</body>
+</html>

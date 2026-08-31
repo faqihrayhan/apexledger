@@ -1,12 +1,20 @@
 /**
  * ApexLedger — Root application component.
  *
- * Sets up React Query, Zustand, and the router.
- * The dark theme is applied at the document level via Tailwind's
- * `darkMode: "class"` strategy.
+ * Wires React Query, the auth gate (login/setup wizard vs. the app
+ * shell), and the page switcher from the UI store.
  */
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAuthStore } from "@/stores/auth";
+import { useUiStore } from "@/stores/ui";
+import { AppLayout } from "@/components/AppLayout";
+import { LoginPage } from "@/pages/Login";
+import { DashboardPage } from "@/pages/Dashboard";
+import { JournalsPage } from "@/pages/Journals";
+import { JournalFormPage } from "@/pages/JournalForm";
+import { TrialBalancePage } from "@/pages/TrialBalance";
+import { AccountsPage } from "@/pages/Accounts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,21 +25,44 @@ const queryClient = new QueryClient({
   },
 });
 
+function CurrentPage() {
+  const page = useUiStore((s) => s.page);
+
+  switch (page) {
+    case "dashboard":
+      return <DashboardPage />;
+    case "journals":
+      return <JournalsPage />;
+    case "journal-new":
+      return <JournalFormPage />;
+    case "trial-balance":
+      return <TrialBalancePage />;
+    case "accounts":
+      return <AccountsPage />;
+    default:
+      return <DashboardPage />;
+  }
+}
+
+function Shell() {
+  const isAuthenticated = useAuthStore((s) => s.token !== null);
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return (
+    <AppLayout>
+      <CurrentPage />
+    </AppLayout>
+  );
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="dark min-h-screen bg-background text-foreground">
-        <main className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">ApexLedger</h1>
-            <p className="text-muted-foreground text-lg">
-              Open-Core AI-Native Accounting Platform
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Frontend scaffold ready — Phase 3 (UI) coming soon.
-            </p>
-          </div>
-        </main>
+        <Shell />
       </div>
     </QueryClientProvider>
   );

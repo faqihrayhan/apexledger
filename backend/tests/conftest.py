@@ -62,10 +62,60 @@ async def clean_tables():
 
     conn = await asyncpg.connect(TEST_DSN)
     try:
+        # NOTE: CASCADE also wipes payroll_component_master and
+        # bpjs_rate_config (FK chains to entities); re-seed them so every
+        # test starts with the migration-provided config rows.
         await conn.execute(
-            "TRUNCATE TABLE journal_lines, journal_entries, "
+            "TRUNCATE TABLE employee_productivity_metrics, "
+            "budget_revisions, budget_lines, budgets, "
+            "asset_disposals, "
+            "asset_depreciation_schedule, fixed_assets, "
+            "cash_flow_forecast_lines, "
+            "bank_statement_lines, "
+            "kasbon_settlement_lines, kasbon_settlements, "
+            "kasbon_requests, petty_cash_funds, bank_accounts, "
+            "landed_cost_lines, landed_costs, "
+            "ap_payment_allocations, ap_payments, "
+            "ap_bill_lines, ap_bills, grn_lines, "
+            "goods_received_notes, purchase_order_lines, "
+            "purchase_orders, purchase_request_lines, "
+            "purchase_requests, vendors, approval_thresholds, "
+            "sales_return_lines, sales_returns, "
+            "pos_transaction_lines, pos_transactions, "
+            "ar_payment_allocations, ar_payments, ar_invoice_lines, "
+            "ar_invoices, delivery_order_lines, delivery_orders, "
+            "sales_order_lines, sales_orders, customers, "
+            "entity_gl_defaults, "
+            "stock_transactions, item_warehouse_stock, "
+            "stock_lots, work_orders, cost_centers, bom_components, boms, "
+            "items, warehouses, "
+            "payroll_entry_lines, payroll_entries, "
+            "payroll_periods, attendance_records, company_calendar, "
+            "employees, overtime_multiplier_config, "
+            "journal_lines, journal_entries, "
             "fiscal_periods, fiscal_years, system_logs, "
             "user_profiles, entities CASCADE"
+        )
+        await conn.execute(
+            "INSERT INTO payroll_component_master "
+            "(code, name, type, is_taxable) VALUES "
+            "('BASIC', 'Gaji Pokok', 'EARNING', TRUE), "
+            "('OVERTIME', 'Upah Lembur', 'EARNING', TRUE), "
+            "('INCENTIVE', 'Insentif', 'EARNING', TRUE), "
+            "('BPJS_KES_EE', 'BPJS Kesehatan (Pegawai)', 'DEDUCTION', FALSE), "
+            "('BPJS_JHT_EE', 'BPJS JHT (Pegawai)', 'DEDUCTION', FALSE), "
+            "('BPJS_JP_EE', 'BPJS Jaminan Pensiun (Pegawai)', 'DEDUCTION', FALSE), "
+            "('PPH21', 'PPh 21 (TER)', 'DEDUCTION', FALSE), "
+            "('DENDA_UNPAID', 'Potongan Hari Tidak Masuk', 'DEDUCTION', FALSE), "
+            "('DENDA_LATE', 'Potongan Keterlambatan', 'DEDUCTION', FALSE)"
+        )
+        await conn.execute(
+            "INSERT INTO bpjs_rate_config "
+            "(component_code, employee_rate_pct, employer_rate_pct, "
+            "salary_cap, effective_date) VALUES "
+            "('BPJS_KES_EE', 1.0, 4.0, 12000000, DATE '2024-01-01'), "
+            "('BPJS_JHT_EE', 2.0, 3.7, NULL, DATE '2024-01-01'), "
+            "('BPJS_JP_EE', 1.0, 2.0, 10547400, DATE '2025-01-01')"
         )
     finally:
         await conn.close()

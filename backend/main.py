@@ -13,7 +13,20 @@ from typing import TYPE_CHECKING
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import ai_chat, auth, coa, gl, system
+from app.api.v1 import (
+    ai_chat,
+    auth,
+    budgeting,
+    coa,
+    fixed_asset,
+    gl,
+    hr,
+    inventory,
+    procurement,
+    sales,
+    system,
+    treasury,
+)
 from app.core.config import settings
 
 if TYPE_CHECKING:
@@ -24,14 +37,20 @@ if TYPE_CHECKING:
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan handler.
 
-    Runs startup tasks (e.g. update check, cron scheduler init) before
-    yielding, and cleanup tasks after the app shuts down.
+    Starts the APScheduler background jobs (update check + license
+    ping) on boot and shuts them down cleanly on exit. Jobs are
+    opt-in (see app/cron/tasks.py) and never block requests.
     """
     # --- Startup ---
-    # Future: start APScheduler, run initial update check, etc.
+    from app.cron.tasks import register_jobs
+
+    register_jobs()
     yield
     # --- Shutdown ---
-    # Future: graceful scheduler shutdown, connection pool disposal.
+    from app.cron.tasks import scheduler
+
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
 
 
 app = FastAPI(
@@ -63,6 +82,13 @@ app.include_router(gl.router, prefix="/api/v1")
 app.include_router(coa.router, prefix="/api/v1")
 app.include_router(ai_chat.router, prefix="/api/v1")
 app.include_router(system.router, prefix="/api/v1")
+app.include_router(hr.router, prefix="/api/v1")
+app.include_router(inventory.router, prefix="/api/v1")
+app.include_router(sales.router, prefix="/api/v1")
+app.include_router(procurement.router, prefix="/api/v1")
+app.include_router(treasury.router, prefix="/api/v1")
+app.include_router(fixed_asset.router, prefix="/api/v1")
+app.include_router(budgeting.router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])

@@ -40,3 +40,21 @@ class SetupStatusResponse(BaseModel):
     """Reports whether the instance has been initialized."""
 
     is_initialized: bool
+
+
+class UpdateStatusResponse(BaseModel):
+    """Opt-in update check result (never auto-installs)."""
+
+    update_available: bool
+    current_version: str | None = None
+    latest_version: str | None = None
+    release_url: str | None = None
+
+
+class LicenseStatusResponse(BaseModel):
+    """Cached license snapshot (Community or Enterprise)."""
+
+    edition: str
+    valid: bool
+    message: str
+    grace: bool = False

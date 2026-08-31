@@ -22,24 +22,68 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import create_access_token, hash_password
+from app.core.updates import check_for_updates
 from app.db.session import get_db
 from app.models.gl import FiscalPeriod, FiscalYear
 from app.models.layer0 import Entity, RoleEnum, SystemLog, UserProfile
 from app.schemas.system import (
+    LicenseStatusResponse,
     SetupRequest,
     SetupResponse,
     SetupStatusResponse,
+    UpdateStatusResponse,
 )
 
 router = APIRouter(prefix="/system", tags=["System"])
 
 
 @router.get("/status", response_model=SetupStatusResponse)
-async def get_setup_status(db: AsyncSession = Depends(get_db)):
+async def get_setup_status(db: AsyncSession = Depends(get_db)) -> SetupStatusResponse:
     """Report whether this instance has completed first-boot setup."""
     result = await db.execute(select(func.count()).select_from(Entity))
     entity_count = result.scalar_one()
     return SetupStatusResponse(is_initialized=entity_count > 0)
+
+
+@router.get("/updates", response_model=UpdateStatusResponse)
+async def get_update_status() -> UpdateStatusResponse:
+    """Opt-in update check (non-intrusive; privacy-first).
+
+    Reports whether a newer release exists. Never downloads or
+    installs anything — the user decides.
+    """
+    info = await check_for_updates()
+    if info is None:
+        return UpdateStatusResponse(
+            update_available=False,
+            current_version=None,
+            latest_version=None,
+            release_url=None,
+        )
+    return UpdateStatusResponse(
+        update_available=info.is_update_available,
+        current_version=info.current_version,
+        latest_version=info.latest_version,
+        release_url=info.release_url,
+    )
+
+
+@router.get("/license", response_model=LicenseStatusResponse)
+async def get_license_status() -> LicenseStatusResponse:
+    """License snapshot (cached; never blocks on the network).
+
+    Community Edition reports itself without any phone-home. Enterprise
+    keys fall back to the cached validation inside the grace window.
+    """
+    from app.core.license import license_status
+
+    info = license_status()
+    return LicenseStatusResponse(
+        edition=info.edition,
+        valid=info.valid,
+        message=info.message,
+        grace=info.grace,
+    )
 
 
 @router.post("/setup", response_model=SetupResponse, status_code=status.HTTP_201_CREATED)
