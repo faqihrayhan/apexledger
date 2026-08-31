@@ -19,6 +19,7 @@ import {
   Scale,
   Sparkles,
   Users,
+  Wallet,
 } from "lucide-react";
 
 /* ------------------------------ nav config ------------------------------ */
@@ -33,6 +34,7 @@ const NAV_ITEMS: Array<{
   { page: "journal-new", label: "New Journal", icon: FilePlus2 },
   { page: "trial-balance", label: "Trial Balance", icon: Scale },
   { page: "accounts", label: "Accounts", icon: Users },
+  { page: "payroll", label: "Payroll", icon: Wallet },
 ];
 
 /* ----------------------------- AI sidebar ------------------------------- */

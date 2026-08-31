@@ -15,6 +15,7 @@ import { JournalsPage } from "@/pages/Journals";
 import { JournalFormPage } from "@/pages/JournalForm";
 import { TrialBalancePage } from "@/pages/TrialBalance";
 import { AccountsPage } from "@/pages/Accounts";
+import { PayrollPage } from "@/pages/Payroll";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +40,8 @@ function CurrentPage() {
       return <TrialBalancePage />;
     case "accounts":
       return <AccountsPage />;
+    case "payroll":
+      return <PayrollPage />;
     default:
       return <DashboardPage />;
   }

@@ -114,6 +114,14 @@ requests:
   without updating `README.md` (escape hatch: `[skip-readme]` in the commit
   message).
 
+## Frontend Coverage
+
+Login/setup, dashboard, GL (journals, trial balance, chart of accounts),
+AI chat, and Payroll (M2) — employee master, period runs with the
+calculate → approve → disburse lifecycle and account pickers for the
+accrual/payment postings. Remaining module UIs (inventory, sales,
+procurement, treasury, fixed assets, budgeting) are in progress.
+
 ## Development
 
 ```bash

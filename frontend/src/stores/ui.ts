@@ -13,7 +13,8 @@ export type Page =
   | "journals"
   | "journal-new"
   | "trial-balance"
-  | "accounts";
+  | "accounts"
+  | "payroll";
 
 interface UiState {
   page: Page;
