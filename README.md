@@ -75,8 +75,9 @@ All modules below are implemented end-to-end (schema → RPC → API → tests):
 
 - **Row-Level Security** — every table scoped by `entity_id` with JWT-claim
   injection (`jwt.claims.*`), dual-layered with application-level checks.
-- **Role checks hardened against NULL** — RPC role guards reject requests
-  when the role claim is missing entirely (no NULL-bypass).
+- **Role checks hardened against NULL** — all 30 role-guarded RPCs reject
+  requests when the role claim is missing entirely (no NULL-bypass);
+  locked by dedicated regression tests.
 - **Immutable audit** — budget revisions store before-snapshots; posted
   journals are irreversible.
 - **Zero phone-home** — Community edition performs no outbound telemetry.
