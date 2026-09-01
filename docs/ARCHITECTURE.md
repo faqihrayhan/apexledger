@@ -55,6 +55,15 @@ all three.
 All amounts travel as **strings** in JSON (Decimal precision), and the
 engine computes in `NUMERIC`. Never parse amounts as floats in TS.
 
+### Server base URL (browser vs. desktop)
+
+All API calls go through `api.ts`, which prefixes requests with
+`apiBase()` from `stores/server.ts`. Empty base → same-origin (browser
+mode via the Vite proxy); a persisted absolute URL → the Tauri desktop
+app pointing at the factory server. The connect screen
+(`pages/Connect.tsx`) probes `/system/status` before committing a URL.
+The SSE stream in `AiChat.tsx` follows the same contract.
+
 ### Business rules
 
 All accounting logic lives in PL/pgSQL RPCs (`fn_*`) created by Alembic

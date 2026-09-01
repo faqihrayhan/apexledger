@@ -28,6 +28,10 @@ frontend/dist/
 frontend/tsconfig.tsbuildinfo
 frontend/.eslintcache
 
+# Tauri / Rust
+frontend/src-tauri/target/
+frontend/src-tauri/gen/
+
 # IDE
 .vscode/
 .idea/

@@ -121,6 +121,12 @@ requests:
   without updating `README.md` (escape hatch: `[skip-readme]` in the commit
   message).
 
+`.github/workflows/desktop.yml` builds the Tauri desktop installers
+(Windows `.msi`, macOS `.dmg`, Linux `.AppImage`) on **manual dispatch**
+only — Actions → *Desktop Build (Tauri)* → *Run workflow*. Default is the
+Windows MSI (cheapest); pick *windows+linux* or *all* to add the other
+platforms. Artifacts are attached to the workflow run for 14 days.
+
 ## Frontend Coverage
 
 Login/setup, dashboard, GL (journals, trial balance, chart of accounts), AI
@@ -130,6 +136,11 @@ Procurement (PO → approval → GRN inspection → 3-way match bills, returns,
 landed costs), Treasury (kasbon lifecycle, bank master, reconciliation,
 forecast), Fixed Assets (registration, depreciation batch, schedule, disposal),
 and Budgeting (lifecycle with revisions, variance report, trend, productivity).
+
+The same UI ships as a desktop app (Tauri v2): Windows `.msi`, macOS `.dmg`,
+Linux `.AppImage`. On first launch the desktop app asks for the ApexLedger
+server address (the factory machine, e.g. `http://192.168.1.100:8000`) —
+it talks to the backend over HTTP, exactly like the browser client.
 
 ## Development
 

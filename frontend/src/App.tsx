@@ -8,8 +8,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/auth";
 import { useUiStore } from "@/stores/ui";
+import { useServerStore } from "@/stores/server";
 import { AppLayout } from "@/components/AppLayout";
 import { LoginPage } from "@/pages/Login";
+import { ConnectScreen } from "@/pages/Connect";
 import { DashboardPage } from "@/pages/Dashboard";
 import { JournalsPage } from "@/pages/Journals";
 import { JournalFormPage } from "@/pages/JournalForm";
@@ -22,6 +24,13 @@ import { ProcurementPage } from "@/pages/Procurement";
 import { TreasuryPage } from "@/pages/Treasury";
 import { FixedAssetPage } from "@/pages/FixedAsset";
 import { BudgetingPage } from "@/pages/Budgeting";
+
+declare global {
+  interface Window {
+    /** Injected by Tauri v2 at runtime; undefined in the browser. */
+    __TAURI_INTERNALS__?: unknown;
+  }
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +76,18 @@ function CurrentPage() {
 
 function Shell() {
   const isAuthenticated = useAuthStore((s) => s.token !== null);
+
+  // Desktop-first-run gate: with no server configured the app cannot
+  // reach any API. In the browser baseUrl is always '' (same-origin),
+  // so this screen never appears there.
+  const needsServer =
+    typeof window !== "undefined" &&
+    window.__TAURI_INTERNALS__ !== undefined &&
+    useServerStore.getState().baseUrl === "";
+
+  if (needsServer) {
+    return <ConnectScreen />;
+  }
 
   if (!isAuthenticated) {
     return <LoginPage />;

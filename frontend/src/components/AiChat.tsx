@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth";
+import { apiBase } from "@/stores/server";
 import { Button, Input } from "@/components/ui";
 import { Loader2, Send, Sparkles, Wrench } from "lucide-react";
 
@@ -40,7 +41,10 @@ async function streamChat(
   onEvent: (e: ChatEvent) => void,
 ): Promise<void> {
   const token = useAuthStore.getState().token;
-  const res = await fetch("/api/v1/ai/chat", {
+  // Same contract as api.ts: empty base → same-origin (browser), otherwise
+  // the persisted desktop server URL.
+  const base = apiBase();
+  const res = await fetch(`${base}/api/v1/ai/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -1,0 +1,126 @@
+name: Desktop Build (Tauri)
+
+# Manual dispatch only — desktop installers are built on demand, not on
+# every push (keeps Actions minutes low; the private-repo budget is
+# shared with the main CI).
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: "Runner matrix (default: Windows MSI only)"
+        required: false
+        default: "windows"
+        type: choice
+        options:
+          - windows
+          - windows+linux
+          - all
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-tauri:
+    name: Tauri — ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows (msi)
+            args: "--target x86_64-pc-windows-msvc"
+            rust-target: x86_64-pc-windows-msvc
+          - os: ubuntu-22.04
+            label: Linux (AppImage)
+            args: ""
+            rust-target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            label: macOS (dmg)
+            args: "--target universal-apple-darwin"
+            rust-target: aarch64-apple-darwin
+
+    steps:
+      - name: Respect platform filter
+        id: enabled
+        shell: bash
+        run: |
+          choice="${{ github.event.inputs.platforms || 'windows' }}"
+          case "$choice" in
+            windows)       want="windows" ;;
+            windows+linux) want="windows linux" ;;
+            all)           want="windows linux macos" ;;
+            *)             want="windows" ;;
+          esac
+          os_name="$(echo '${{ matrix.os }}' | cut -d- -f1)"
+          if echo "$want" | grep -qw "$os_name"; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Skipped: '$choice' does not include $os_name."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.enabled.outputs.enabled == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.enabled.outputs.enabled == 'true'
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Rust toolchain
+        if: steps.enabled.outputs.enabled == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust-target }}
+
+      - name: Rust cache
+        if: steps.enabled.outputs.enabled == 'true'
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: frontend/src-tauri -> target
+
+      - name: Linux system dependencies
+        if: steps.enabled.outputs.enabled == 'true' && matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
+            librsvg2-dev libssl-dev build-essential curl wget file \
+            libxdo-dev libshaderc-dev libvulkan-dev
+
+      - name: Install frontend dependencies
+        if: steps.enabled.outputs.enabled == 'true'
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Tauri app
+        if: steps.enabled.outputs.enabled == 'true'
+        working-directory: frontend
+        shell: bash
+        run: |
+          # `tauri build` runs the configured beforeBuildCommand (tsc -b &&
+          # vite build) first, then compiles the Rust shell and bundles.
+          npx tauri build ${{ matrix.args }}
+
+      - name: Upload installers
+        if: steps.enabled.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: apexledger-desktop-${{ matrix.rust-target }}
+          path: |
+            frontend/src-tauri/target/*/release/bundle/msi/*.msi
+            frontend/src-tauri/target/release/bundle/msi/*.msi
+            frontend/src-tauri/target/*/release/bundle/dmg/*.dmg
+            frontend/src-tauri/target/release/bundle/dmg/*.dmg
+            frontend/src-tauri/target/*/release/bundle/appimage/*.AppImage
+            frontend/src-tauri/target/release/bundle/appimage/*.AppImage
+          if-no-files-found: error
+          retention-days: 14

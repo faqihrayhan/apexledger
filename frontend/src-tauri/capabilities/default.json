@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schema.tauri.app/acl-capability/2",
+  "identifier": "default",
+  "description": "Default capability — the desktop shell needs no extra Tauri APIs: all data flows through the ApexLedger backend over HTTP(S).",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}

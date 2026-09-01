@@ -164,9 +164,30 @@ session and truncates per test — it never touches your dev data.
 
 ## Desktop App (Tauri)
 
-`frontend/src-tauri/` holds the Tauri v2 configuration. Building the
-desktop bundle requires the Rust toolchain (`rustup`); see
-`frontend/src-tauri/README.md` once the toolchain is installed.
+`frontend/src-tauri/` holds the Tauri v2 shell. Two ways to build the
+installers:
+
+**A. GitHub Actions (recommended — no local Rust needed).** Repo →
+Actions → *Desktop Build (Tauri)* → *Run workflow*. Default input
+builds the Windows `.msi` only; `windows+linux` / `all` add the other
+platforms. Installers are attached to the run as artifacts (14 days).
+
+**B. Locally.** Install the Rust toolchain (`rustup`) plus the platform
+extras (Linux also needs `libwebkit2gtk-4.1-dev`), then:
+
+```bash
+cd frontend
+npm ci
+npm run tauri build
+# → src-tauri/target/release/bundle/{msi,dmg,appimage}/
+```
+
+**First launch (desktop):** the app shows a *Connect to server* screen —
+enter the factory server address (e.g. `http://192.168.1.100:8000`).
+The choice is persisted (`apexledger-server` in localStorage) and can be
+changed later via the header chip. The backend must listen on the LAN
+interface (`uvicorn main:app --host 0.0.0.0`) for remote desktop clients
+to reach it.
 
 ## Docker Quickstart (full stack in 3 commands)
 

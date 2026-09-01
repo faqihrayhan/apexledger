@@ -8,6 +8,7 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/stores/auth";
 import { useUiStore, type Page } from "@/stores/ui";
+import { useServerStore } from "@/stores/server";
 import { AiChat } from "@/components/AiChat";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,8 @@ function Header() {
   const toggleAiSidebar = useUiStore((s) => s.toggleAiSidebar);
   const aiSidebarOpen = useUiStore((s) => s.aiSidebarOpen);
   const role = useAuthStore((s) => s.role);
+  const baseUrl = useServerStore((s) => s.baseUrl);
+  const setBaseUrl = useServerStore((s) => s.setBaseUrl);
 
   return (
     <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-background px-4">
@@ -69,6 +72,22 @@ function Header() {
           <BookOpen className="h-3.5 w-3.5 text-primary" />
         </div>
         <span className="text-sm font-semibold tracking-tight">ApexLedger</span>
+        {/* Server chip — empty label in the browser (same-origin), the
+            factory server address in the desktop app. Click to change. */}
+        <button
+          type="button"
+          title="Server address — click to change"
+          onClick={() => {
+            const next = window.prompt(
+              "ApexLedger server address (leave empty for same-origin):",
+              baseUrl,
+            );
+            if (next !== null) setBaseUrl(next);
+          }}
+          className="ml-2 max-w-[220px] truncate rounded border border-border bg-secondary px-2 py-0.5 font-mono text-[11px] text-muted-foreground hover:text-foreground"
+        >
+          {baseUrl ? baseUrl.replace(/^https?:\/\//, "") : "local"}
+        </button>
       </div>
 
       <div className="flex items-center gap-3">

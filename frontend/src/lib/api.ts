@@ -6,11 +6,19 @@
  */
 
 import { useAuthStore } from "@/stores/auth";
+import { apiBase } from "@/stores/server";
 
-const API_BASE = "/api/v1";
+const API_PREFIX = "/api/v1";
 
 interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
+  /**
+   * Optional absolute server URL for this single request. Used by the
+   * connect screen to probe a candidate factory server before the
+   * server store is updated (persisting a URL that has never answered
+   * would brick the app in "cannot connect" limbo).
+   */
+  probeUrl?: string;
 }
 
 export class ApiError extends Error {
@@ -47,7 +55,8 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { body, ...fetchOptions } = options;
+  const { body, probeUrl, ...fetchOptions } = options;
+  const base = probeUrl ?? apiBase();
 
   const headers = new Headers(fetchOptions.headers);
   headers.set("Content-Type", "application/json");
@@ -57,7 +66,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${base}${API_PREFIX}${path}`, {
     ...fetchOptions,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -81,7 +90,6 @@ export const api = {
 
   post: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
     request<T>(path, { ...opts, method: "POST", body }),
-
   patch: <T>(path: string, body?: unknown, opts?: RequestOptions) =>
     request<T>(path, { ...opts, method: "PATCH", body }),
 
