@@ -57,17 +57,24 @@ jobs:
           case "$choice" in
             windows)       want="windows" ;;
             macos)         want="macos" ;;
-            linux)         want="ubuntu" ;;
+            linux)         want="linux" ;;
             windows+linux) want="windows linux" ;;
             all)           want="windows linux macos" ;;
             *)             want="windows" ;;
           esac
+          # Normalize the runner name to the platform word used above.
           os_name="$(echo '${{ matrix.os }}' | cut -d- -f1)"
-          if echo "$want" | grep -qw "$os_name"; then
+          case "$os_name" in
+            windows) norm="windows" ;;
+            ubuntu)  norm="linux" ;;
+            macos)   norm="macos" ;;
+            *)       norm="$os_name" ;;
+          esac
+          if echo "$want" | grep -qw "$norm"; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Skipped: '$choice' does not include $os_name."
+            echo "Skipped: '$choice' does not include $norm."
           fi
 
       - uses: actions/checkout@v4
