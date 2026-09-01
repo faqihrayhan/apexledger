@@ -13,6 +13,8 @@ on:
         type: choice
         options:
           - windows
+          - macos
+          - linux
           - windows+linux
           - all
 
@@ -44,6 +46,7 @@ jobs:
             label: macOS (dmg)
             args: "--target universal-apple-darwin"
             rust-target: aarch64-apple-darwin
+            rust-extra-targets: x86_64-apple-darwin
 
     steps:
       - name: Respect platform filter
@@ -53,6 +56,8 @@ jobs:
           choice="${{ github.event.inputs.platforms || 'windows' }}"
           case "$choice" in
             windows)       want="windows" ;;
+            macos)         want="macos" ;;
+            linux)         want="ubuntu" ;;
             windows+linux) want="windows linux" ;;
             all)           want="windows linux macos" ;;
             *)             want="windows" ;;
@@ -79,7 +84,7 @@ jobs:
         if: steps.enabled.outputs.enabled == 'true'
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.rust-target }}
+          targets: ${{ matrix.rust-target }} ${{ matrix.rust-extra-targets }}
 
       - name: Rust cache
         if: steps.enabled.outputs.enabled == 'true'
