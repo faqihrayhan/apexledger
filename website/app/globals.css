@@ -1,4 +1,5 @@
-/* ApexLedger website — dark void theme (#0c0d0e), no gradients, no emoji. */
+/* ApexLedger landing — dark void theme (#0c0d0e), no gradients, no emoji.
+   Ported 1:1 from the original static site; no Tailwind, one global sheet. */
 
 :root {
   --bg: #0c0d0e;
@@ -378,9 +379,12 @@ code {
   line-height: 1.9;
 }
 
+.install-list a { color: var(--fg); }
+.install-list a:hover { color: var(--primary); }
+
 .install-note {
-  font-size: 12.5px !important;
-  color: var(--dim) !important;
+  font-size: 12.5px;
+  color: var(--dim);
   line-height: 1.6;
 }
 

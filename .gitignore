@@ -28,6 +28,13 @@ frontend/dist/
 frontend/tsconfig.tsbuildinfo
 frontend/.eslintcache
 
+# Website (Next.js landing)
+website/node_modules/
+website/.next/
+website/out/
+website/tsconfig.tsbuildinfo
+website/.eslintcache
+
 # Tauri / Rust
 frontend/src-tauri/target/
 frontend/src-tauri/gen/

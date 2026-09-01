@@ -30,7 +30,7 @@ apexledger/
 │   ├── src/lib/            # api client (JWT auto-inject), types, utils
 │   └── src-tauri/          # Tauri v2 desktop config (Rust toolchain needed)
 ├── docs/                   # public project documentation
-├── website/                # marketing site (static HTML/CSS)
+├── website/                # landing page (Next.js 16, TypeScript, next-intl; static export for Vercel)
 └── .github/                # CI workflow, issue & PR templates
 ```
 
