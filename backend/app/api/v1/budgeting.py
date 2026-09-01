@@ -24,10 +24,13 @@ from app.api.v1.sales import _parse_rpc_json, _require_roles
 from app.core.rpc_errors import raise_from_rpc
 from app.core.security import get_current_user
 from app.schemas.budgeting import (
+    BudgetLineOut,
+    BudgetListOut,
     BudgetStatusResponse,
     BudgetVsActualRow,
     CreateBudgetRequest,
     CreateBudgetResponse,
+    FiscalYearOut,
     MonthlyTrendRow,
     ProductivityBatchResponse,
     ReviseBudgetRequest,
@@ -317,3 +320,106 @@ async def run_productivity_batch(
     return ProductivityBatchResponse(
         metrics_calculated=rpc["metrics_calculated"]
     )
+
+
+# ---------------------------------------------------------------------------
+# Read-only helpers (UI support — no business logic, no migration)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/fiscal-years", response_model=list[FiscalYearOut])
+async def list_fiscal_years(
+    db: AsyncSession = Depends(get_db_with_rls),
+    current_user: dict = Depends(get_current_user),
+) -> list[FiscalYearOut]:
+    """List fiscal years for the current entity (for budget forms)."""
+    result = await db.execute(
+        text(
+            "SELECT id, year_label, start_date, end_date, status "
+            "FROM fiscal_years "
+            "WHERE entity_id = CAST(:entity_id AS uuid) "
+            "ORDER BY start_date"
+        ),
+        {"entity_id": current_user["entity_id"]},
+    )
+    return [
+        FiscalYearOut(
+            id=r[0],
+            year_label=r[1],
+            start_date=r[2],
+            end_date=r[3],
+            status=r[4],
+        )
+        for r in result.fetchall()
+    ]
+
+
+@router.get("/budgets", response_model=list[BudgetListOut])
+async def list_budgets(
+    db: AsyncSession = Depends(get_db_with_rls),
+    current_user: dict = Depends(get_current_user),
+) -> list[BudgetListOut]:
+    """List budgets for the current entity with fiscal year labels."""
+    result = await db.execute(
+        text(
+            "SELECT b.id, b.budget_name, b.fiscal_year_id, "
+            "fy.year_label, b.status, b.created_at "
+            "FROM budgets b "
+            "JOIN fiscal_years fy ON fy.id = b.fiscal_year_id "
+            "WHERE b.entity_id = CAST(:entity_id AS uuid) "
+            "ORDER BY b.created_at"
+        ),
+        {"entity_id": current_user["entity_id"]},
+    )
+    return [
+        BudgetListOut(
+            id=r[0],
+            budget_name=r[1],
+            fiscal_year_id=r[2],
+            year_label=r[3],
+            status=r[4],
+            created_at=r[5],
+        )
+        for r in result.fetchall()
+    ]
+
+
+@router.get(
+    "/budgets/{budget_id}/lines", response_model=list[BudgetLineOut]
+)
+async def list_budget_lines(
+    budget_id: str,
+    db: AsyncSession = Depends(get_db_with_rls),
+    current_user: dict = Depends(get_current_user),
+) -> list[BudgetLineOut]:
+    """List budget lines with account codes (for revise forms)."""
+    result = await db.execute(
+        text(
+            "SELECT bl.id, bl.account_id, coa.account_code, "
+            "coa.account_name, bl.department_code, "
+            "bl.period_month, bl.budgeted_amount "
+            "FROM budget_lines bl "
+            "JOIN budgets b ON b.id = bl.budget_id "
+            "JOIN chart_of_accounts coa "
+            "  ON coa.id = bl.account_id "
+            "WHERE b.entity_id = CAST(:entity_id AS uuid) "
+            "AND bl.budget_id = CAST(:budget_id AS uuid) "
+            "ORDER BY coa.account_code, bl.period_month"
+        ),
+        {
+            "entity_id": current_user["entity_id"],
+            "budget_id": budget_id,
+        },
+    )
+    return [
+        BudgetLineOut(
+            id=r[0],
+            account_id=r[1],
+            account_code=r[2],
+            account_name=r[3],
+            department_code=r[4],
+            period_month=r[5],
+            budgeted_amount=_amt(r[6]),
+        )
+        for r in result.fetchall()
+    ]

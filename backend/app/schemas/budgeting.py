@@ -7,6 +7,7 @@ Amounts are strings in JSON (Decimal precision).
 from __future__ import annotations
 
 import uuid
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
@@ -61,3 +62,30 @@ class MonthlyTrendRow(BaseModel):
 
 class ProductivityBatchResponse(BaseModel):
     metrics_calculated: int
+
+
+class BudgetListOut(BaseModel):
+    id: uuid.UUID
+    budget_name: str
+    fiscal_year_id: uuid.UUID
+    year_label: str
+    status: str
+    created_at: datetime
+
+
+class BudgetLineOut(BaseModel):
+    id: uuid.UUID
+    account_id: uuid.UUID
+    account_code: str
+    account_name: str
+    department_code: str | None = None
+    period_month: int
+    budgeted_amount: str
+
+
+class FiscalYearOut(BaseModel):
+    id: uuid.UUID
+    year_label: str
+    start_date: date
+    end_date: date
+    status: str

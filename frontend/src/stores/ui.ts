@@ -14,7 +14,13 @@ export type Page =
   | "journal-new"
   | "trial-balance"
   | "accounts"
-  | "payroll";
+  | "payroll"
+  | "inventory"
+  | "sales"
+  | "procurement"
+  | "treasury"
+  | "fixed-asset"
+  | "budgeting";
 
 interface UiState {
   page: Page;

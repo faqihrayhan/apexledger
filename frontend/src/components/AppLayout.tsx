@@ -13,10 +13,16 @@ import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import {
   BookOpen,
+  Boxes,
   FilePlus2,
+  ClipboardList,
+  Landmark,
   LayoutDashboard,
   LogOut,
+  Package,
+  PieChart,
   Scale,
+  ShoppingCart,
   Sparkles,
   Users,
   Wallet,
@@ -35,6 +41,12 @@ const NAV_ITEMS: Array<{
   { page: "trial-balance", label: "Trial Balance", icon: Scale },
   { page: "accounts", label: "Accounts", icon: Users },
   { page: "payroll", label: "Payroll", icon: Wallet },
+  { page: "inventory", label: "Inventory", icon: Boxes },
+  { page: "sales", label: "Sales & AR", icon: ShoppingCart },
+  { page: "procurement", label: "Procurement", icon: ClipboardList },
+  { page: "treasury", label: "Treasury", icon: Landmark },
+  { page: "fixed-asset", label: "Fixed Assets", icon: Package },
+  { page: "budgeting", label: "Budgeting", icon: PieChart },
 ];
 
 /* ----------------------------- AI sidebar ------------------------------- */

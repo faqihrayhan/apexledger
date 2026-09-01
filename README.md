@@ -116,11 +116,13 @@ requests:
 
 ## Frontend Coverage
 
-Login/setup, dashboard, GL (journals, trial balance, chart of accounts),
-AI chat, and Payroll (M2) — employee master, period runs with the
-calculate → approve → disburse lifecycle and account pickers for the
-accrual/payment postings. Remaining module UIs (inventory, sales,
-procurement, treasury, fixed assets, budgeting) are in progress.
+Login/setup, dashboard, GL (journals, trial balance, chart of accounts), AI
+chat, and all module UIs M2–M8: Payroll, Inventory (on-hand, master, movements,
+work orders), Sales & AR (orders → delivery → invoice → payment, POS, returns),
+Procurement (PO → approval → GRN inspection → 3-way match bills, returns,
+landed costs), Treasury (kasbon lifecycle, bank master, reconciliation,
+forecast), Fixed Assets (registration, depreciation batch, schedule, disposal),
+and Budgeting (lifecycle with revisions, variance report, trend, productivity).
 
 ## Development
 

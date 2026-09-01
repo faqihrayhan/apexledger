@@ -164,14 +164,15 @@ async def _full_flow_to_match(client, headers, ids, vendor,
     assert r.status_code == 200, r.text
     grn = r.json()
 
-    conn = await asyncpg.connect(DB)
-    try:
-        grn_line = await conn.fetchrow(
-            "SELECT id FROM grn_lines WHERE grn_id = $1", grn["grn_id"]
-        )
-        grn_line_id = str(grn_line["id"])
-    finally:
-        await conn.close()
+    # NEW: fetch grn_line_id via the public API instead of direct DB access.
+    r = await client.get(
+        f"/api/v1/proc/grns/{grn['grn_id']}/lines", headers=headers
+    )
+    assert r.status_code == 200, r.text
+    grn_lines = r.json()
+    assert len(grn_lines) == 1
+    assert grn_lines[0]["qty_received"] == "10.0000"
+    grn_line_id = grn_lines[0]["grn_line_id"]
 
     r = await client.post(
         f"/api/v1/proc/grns/{grn['grn_id']}/inspect",
@@ -209,6 +210,13 @@ async def _full_flow_to_match(client, headers, ids, vendor,
     return {"grn": grn, "bill": r.json(), "po": po}
 
 
+async def _grn_line_ids_via_api(client, headers, grn_id: str) -> list[str]:
+    """Fetch grn_line_id list through the public API (no direct DB)."""
+    r = await client.get(
+        f"/api/v1/proc/grns/{grn_id}/lines", headers=headers
+    )
+    assert r.status_code == 200, r.text
+    return [ln["grn_line_id"] for ln in r.json()]
 @pytest.mark.asyncio
 async def test_procurement_full_flow_math_proof():
     from main import app
@@ -424,15 +432,9 @@ async def test_receipt_exceeds_and_inspect_twice():
         assert r.status_code == 200, r.text
         grn = r.json()
 
-        conn = await asyncpg.connect(DB)
-        try:
-            grn_line = await conn.fetchrow(
-                "SELECT id FROM grn_lines WHERE grn_id = $1",
-                grn["grn_id"],
-            )
-            grn_line_id = str(grn_line["id"])
-        finally:
-            await conn.close()
+        grn_line_id = (
+            await _grn_line_ids_via_api(client, headers, grn["grn_id"])
+        )[0]
 
         payload = {
             "line_results": [
@@ -541,15 +543,9 @@ async def test_bill_guards():
         assert "GRN_NOT_INSPECTED" in r.text
 
         # Inspect then double-bill -> GRN_ALREADY_BILLED.
-        conn = await asyncpg.connect(DB)
-        try:
-            grn_line = await conn.fetchrow(
-                "SELECT id FROM grn_lines WHERE grn_id = $1",
-                grn["grn_id"],
-            )
-            grn_line_id = str(grn_line["id"])
-        finally:
-            await conn.close()
+        grn_line_id = (
+            await _grn_line_ids_via_api(client, headers, grn["grn_id"])
+        )[0]
         r = await client.post(
             f"/api/v1/proc/grns/{grn['grn_id']}/inspect",
             headers=headers,

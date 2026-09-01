@@ -16,6 +16,12 @@ import { JournalFormPage } from "@/pages/JournalForm";
 import { TrialBalancePage } from "@/pages/TrialBalance";
 import { AccountsPage } from "@/pages/Accounts";
 import { PayrollPage } from "@/pages/Payroll";
+import { InventoryPage } from "@/pages/Inventory";
+import { SalesPage } from "@/pages/Sales";
+import { ProcurementPage } from "@/pages/Procurement";
+import { TreasuryPage } from "@/pages/Treasury";
+import { FixedAssetPage } from "@/pages/FixedAsset";
+import { BudgetingPage } from "@/pages/Budgeting";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +48,18 @@ function CurrentPage() {
       return <AccountsPage />;
     case "payroll":
       return <PayrollPage />;
+    case "inventory":
+      return <InventoryPage />;
+    case "sales":
+      return <SalesPage />;
+    case "procurement":
+      return <ProcurementPage />;
+    case "treasury":
+      return <TreasuryPage />;
+    case "fixed-asset":
+      return <FixedAssetPage />;
+    case "budgeting":
+      return <BudgetingPage />;
     default:
       return <DashboardPage />;
   }

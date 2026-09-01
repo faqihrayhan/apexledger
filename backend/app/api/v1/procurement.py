@@ -25,6 +25,7 @@ from app.core.security import get_current_user
 from app.models.procurement import (
     ApBill,
     GoodsReceivedNote,
+    GrnLine,
     LandedCost,
     LandedCostAllocMethodEnum,
     PurchaseOrder,
@@ -340,6 +341,71 @@ async def get_grn(
         grn_number=grn.grn_number,
         inspection_status=str(grn.inspection_status),
     )
+
+
+@router.get("/grns", response_model=list[dict])
+async def list_grns(
+    db: AsyncSession = Depends(get_db_with_rls),
+    current_user: dict = Depends(get_current_user),
+) -> list[dict]:
+    """List GRNs for the current entity (newest first, capped)."""
+    stmt = (
+        select(GoodsReceivedNote)
+        .where(GoodsReceivedNote.entity_id == current_user["entity_id"])
+        .order_by(GoodsReceivedNote.received_date.desc())
+        .limit(100)
+    )
+    rows = (await db.execute(stmt)).scalars().all()
+    return [
+        {
+            "grn_id": str(g.id),
+            "grn_number": g.grn_number,
+            "purchase_order_id": str(g.purchase_order_id),
+            "warehouse_id": str(g.warehouse_id),
+            "received_date": g.received_date.isoformat(),
+            "status": str(g.status),
+            "inspection_status": str(g.inspection_status),
+        }
+        for g in rows
+    ]
+
+
+@router.get("/grns/{grn_id}/lines", response_model=list[dict])
+async def list_grn_lines(
+    grn_id: str,
+    db: AsyncSession = Depends(get_db_with_rls),
+    current_user: dict = Depends(get_current_user),
+) -> list[dict]:
+    """GRN line detail — exposes grn_line_id needed by inspect/return flows.
+
+    Entity scoping happens through the parent GRN (RLS on the GRN
+    table); grn_lines inherit the same scope via the FK chain.
+    """
+    stmt = select(GoodsReceivedNote.id).where(
+        GoodsReceivedNote.entity_id == current_user["entity_id"],
+        GoodsReceivedNote.id == uuid.UUID(grn_id),
+    )
+    owner = (await db.execute(stmt)).scalar_one_or_none()
+    if owner is None:
+        raise HTTPException(status_code=404, detail="GRN not found.")
+    rows = (
+        await db.execute(
+            select(GrnLine)
+            .where(GrnLine.grn_id == uuid.UUID(grn_id))
+            .order_by(GrnLine.purchase_order_line_id)
+        )
+    ).scalars().all()
+    return [
+        {
+            "grn_line_id": str(ln.id),
+            "purchase_order_line_id": str(ln.purchase_order_line_id),
+            "item_id": str(ln.item_id),
+            "qty_received": format(ln.qty_received, "f"),
+            "qty_accepted": format(ln.qty_accepted, "f"),
+            "qty_rejected": format(ln.qty_rejected, "f"),
+        }
+        for ln in rows
+    ]
 
 
 @router.post("/grns/{grn_id}/inspect", response_model=InspectGrnResponse)
