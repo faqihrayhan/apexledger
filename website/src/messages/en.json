@@ -1,0 +1,194 @@
+{
+  "nav": {
+    "features": "Features",
+    "security": "Security",
+    "editions": "Editions",
+    "install": "Install",
+    "docs": "Docs",
+    "github": "GitHub"
+  },
+  "hero": {
+    "eyebrow": "Open-Core \u00b7 On-Premise \u00b7 AI-Native",
+    "title1": "Accounting that lives",
+    "title2": "on your machine.",
+    "titleYour": "your",
+    "lede": "ApexLedger enforces double-entry integrity inside PostgreSQL \u2014 not in application code. Post journals, close periods, and read reports with an optional AI assistant. No cloud. No data leaves the host.",
+    "ctaPrimary": "Get Started",
+    "ctaSecondary": "View Source",
+    "stats": {
+      "local": {
+        "value": "100%",
+        "label": "Local-first data"
+      },
+      "rows": {
+        "value": "0",
+        "label": "Rows lost to ledger edits"
+      },
+      "tests": {
+        "value": "53/53",
+        "label": "CI tests passing"
+      }
+    }
+  },
+  "features": {
+    "title": "Built like a vault, runs like a tool.",
+    "items": {
+      "doubleEntry": {
+        "title": "Database-enforced double entry",
+        "body": "Balance validation, posting, reversals, and period closes are PL/pgSQL functions. The engine refuses unbalanced entries at the storage layer \u2014 no application bug can corrupt the books."
+      },
+      "immutable": {
+        "title": "Immutable ledger",
+        "body": "UPDATE and DELETE privileges on journal tables are revoked at the database level. Corrections happen through reversing entries, preserving the full audit trail forever."
+      },
+      "ai": {
+        "title": "Optional AI assistant",
+        "body": "Bring your own key (OpenAI) or run a local model (Ollama). The assistant records transactions through the same secured RPCs \u2014 it can never leave your entity or bypass role checks."
+      },
+      "ui": {
+        "title": "Fast, dense UI",
+        "body": "A dark, keyboard-first interface with virtualized journals for thousands of rows, live debit/credit balance indicators, and a trial balance that proves itself."
+      },
+      "setup": {
+        "title": "One-command setup",
+        "body": "apexledger init prepares the container, database, and migrations. A first-boot wizard creates your entity, admin, and fiscal calendar \u2014 no manual SQL."
+      },
+      "backup": {
+        "title": "Auto-backup before anything",
+        "body": "apexledger backup dumps a timestamped, gzipped snapshot. Updates are opt-in and never install themselves."
+      }
+    }
+  },
+  "security": {
+    "title": "Security model",
+    "cols": {
+      "rls": {
+        "title": "Row-Level Security",
+        "body": "Every table is entity-scoped. JWT claims are injected into the PostgreSQL session so policies evaluate the caller without trusting the application."
+      },
+      "dual": {
+        "title": "Dual-layer defense",
+        "body": "Read endpoints filter by entity again at the application layer. Isolation holds even if a connection bypasses RLS."
+      },
+      "roles": {
+        "title": "Roles in the engine",
+        "body": "Only finance roles can create or post journals \u2014 checked inside the database function, not just the API."
+      }
+    }
+  },
+  "editions": {
+    "title": "Editions",
+    "community": {
+      "name": "Community",
+      "price": "Free",
+      "items": [
+        "Full core accounting (GL, CoA, trial balance)",
+        "Local JWT auth & multi-user roles",
+        "AI assistant via your own keys",
+        "Desktop & CLI packaging"
+      ]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "price": "Subscription",
+      "items": [
+        "Everything in Community",
+        "Turnkey AI gateway (no key setup)",
+        "Cloud portal & consolidated reporting",
+        "Auto-updater with remote maintenance SLA"
+      ]
+    }
+  },
+  "install": {
+    "title": "Install",
+    "subtitle": "Pick how you want to run ApexLedger. All three use the same core.",
+    "server": {
+      "title": "Server",
+      "for": "Linux \u00b7 macOS \u00b7 WSL",
+      "body": "Full stack on one machine: Postgres container, migrations, API server. One line via terminal:",
+      "windowsLabel": "Windows (PowerShell):",
+      "note": "Requires git, Python 3.11+, Docker. Then open http://localhost:8000."
+    },
+    "desktop": {
+      "title": "Desktop app",
+      "for": "Windows \u00b7 macOS \u00b7 Linux",
+      "body": "Native app for employees \u2014 install on each PC, then point it at your factory server.",
+      "windows": "Windows",
+      "macos": "macOS",
+      "macosNote": "Intel + Apple Silicon",
+      "linux": "Linux",
+      "note": "All downloads: GitHub Releases. First launch asks for the server address (e.g. http://192.168.1.100:8000)."
+    },
+    "browser": {
+      "title": "Browser",
+      "for": "Any device on the LAN",
+      "body": "Zero install for employees: the server machine already serves the web UI.",
+      "note": "No app to install \u2014 just a browser. Same features, same data."
+    },
+    "advanced": "Manual / advanced setup (no Docker, custom Postgres): see docs/SETUP.md."
+  },
+  "footer": {
+    "line1": "ApexLedger \u2014 open-core accounting. Core engine under an open license; Enterprise add-ons by subscription.",
+    "github": "GitHub"
+  },
+  "docs": {
+    "index": {
+      "title": "Documentation",
+      "lede": "Guides and reference for running ApexLedger \u2014 from first install to month-end close."
+    },
+    "sections": {
+      "gettingStarted": "Getting Started",
+      "userGuide": "User Guide",
+      "reference": "Reference"
+    },
+    "pages": {
+      "installation": {
+        "title": "Installation",
+        "description": "Quick install, manual setup, Docker quickstart, and desktop installers."
+      },
+      "firstBoot": {
+        "title": "First-Boot Setup",
+        "description": "The setup wizard: entity, admin, and fiscal calendar in one atomic transaction."
+      },
+      "configuration": {
+        "title": "Configuration",
+        "description": "Environment variables and the three AI modes (DISABLED / BYOK / LOCAL)."
+      },
+      "journals": {
+        "title": "Daily Journal Entry",
+        "description": "Draft, post, reverse \u2014 the immutable ledger workflow with a live balance meter."
+      },
+      "monthEndClose": {
+        "title": "Month-End Close",
+        "description": "Trial balance as-of, trend review, and period enforcement."
+      },
+      "procureToPay": {
+        "title": "Procure-to-Pay",
+        "description": "PO approval engine, PUTG inspection, 3-way match, and payment."
+      },
+      "orderToCash": {
+        "title": "Order-to-Cash",
+        "description": "Credit gate, delivery, AR invoicing with PPN, returns at cost basis."
+      },
+      "roles": {
+        "title": "Roles",
+        "description": "The nine roles and the dynamic, threshold-driven approval authority."
+      },
+      "cli": {
+        "title": "CLI Reference",
+        "description": "The six operational commands plus tests and lint."
+      },
+      "modules": {
+        "title": "Module Reference",
+        "description": "Every module end-to-end: GL through Budgeting & Analytics."
+      }
+    },
+    "toc": {
+      "title": "On this page"
+    },
+    "pager": {
+      "prev": "Previous",
+      "next": "Next"
+    }
+  }
+}

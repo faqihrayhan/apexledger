@@ -47,7 +47,8 @@ apexledger/
 │   ├── tests/          # 53-test suite (business-math assertions)
 │   └── cli.py          # Backup / restore / update-check CLI
 ├── frontend/           # React + Vite + TypeScript client
-├── website/            # Landing page (Next.js 16 static export, TypeScript, next-intl)
+├── website/            # Marketing site + docs (Next.js 16 static export, TypeScript, next-intl)
+│   └── src/content/docs/  # Docs pages (MD) rendered at /docs — Installation, User Guide, Reference
 ├── docs/               # Project documentation (SETUP, ARCHITECTURE, …)
 └── .github/            # CI workflow, issue & PR templates
 ```
