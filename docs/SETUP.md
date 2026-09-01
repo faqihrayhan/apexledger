@@ -57,7 +57,35 @@ uvicorn main:app --reload
 
 The API is now at `http://localhost:8000` (docs at `/docs`).
 On first boot the frontend shows the setup wizard which creates the
-entity, admin user, and fiscal year.
+entity, admin user, and fiscal year — see "First-Boot Setup" below.
+
+### First-Boot Setup (the setup wizard)
+
+A fresh database serves `is_initialized: false` from
+`GET /api/v1/system/status`; the frontend automatically swaps the
+login form for the **Setup Wizard**. Fill in:
+
+| Field | Meaning | Constraints |
+|---|---|---|
+| Entity code / name | your company identity | code 2–20 chars, unique |
+| Base currency | default ledger currency | default `IDR` |
+| Admin full name / email / password | the first user | password ≥ 8 chars |
+| Fiscal year | e.g. `2026` | 2000–2100 |
+
+`POST /api/v1/system/setup` runs **one atomic transaction**: entity +
+SUPER_ADMIN user + fiscal year + 12 monthly periods + audit entry,
+and returns the first `access_token` — you land straight in the app.
+
+Setup is once-only; a second call is rejected by the engine.
+
+### Adding users
+
+Users are created via `POST /api/v1/auth/register` (authenticated).
+Once the instance is initialized, `entity_id` is required on the
+payload. Pick one of the nine roles — see `docs/USER_FLOWS.md` →
+Role Reference for what each role may do. All role checks are
+enforced twice: coarse guards at the API layer and NULL-hardened
+checks inside the PL/pgSQL RPCs.
 
 ## 2. Frontend
 
@@ -88,6 +116,22 @@ All settings are optional with sane defaults, prefix `APEX_`, read from
 | `APEX_AI_OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama endpoint (LOCAL) |
 | `APEX_AI_OLLAMA_MODEL` | `llama3.1` | Ollama model name (LOCAL) |
 | `APEX_UPDATE_CHECK_ENABLED` | `true` | Opt-in update checker |
+
+### AI modes (right sidebar)
+
+The AI assistant is disabled by default and never phones home. Set
+`APEX_AI_MODE` to enable it:
+
+| Mode | What it does | Required env |
+|---|---|---|
+| `DISABLED` (default) | sidebar shows a hint, no calls are made | — |
+| `BYOK` | bring your own OpenAI-compatible API key | `APEX_AI_OPENAI_API_KEY` (optionally `..._BASE_URL` for vLLM / LM Studio / proxies) |
+| `LOCAL` | runs against a local Ollama instance | `APEX_AI_OLLAMA_BASE_URL` (default `http://localhost:11434`) + `APEX_AI_OLLAMA_MODEL` |
+
+The assistant can list accounts and journals, create/post journal
+entries, and pull trial balances through JSON-Schema tool calling
+routed to the same RPCs — subject to the logged-in user's role and
+entity scoping.
 
 ## CLI (operations)
 
@@ -123,6 +167,51 @@ session and truncates per test — it never touches your dev data.
 `frontend/src-tauri/` holds the Tauri v2 configuration. Building the
 desktop bundle requires the Rust toolchain (`rustup`); see
 `frontend/src-tauri/README.md` once the toolchain is installed.
+
+## Docker Quickstart (full stack in 3 commands)
+
+```bash
+# 1. database
+docker run -d --name apexledger-db \
+  -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=apexledger \
+  -p 5432:5432 postgres:15
+
+# 2. backend (from backend/)
+cd backend && pip install -e ".[dev]" && alembic upgrade head
+uvicorn main:app --reload
+
+# 3. frontend (from frontend/, second terminal)
+npm ci && npm run dev
+```
+
+Open the URL Vite prints (default `http://localhost:5173`) → the
+setup wizard appears → fill it once → you're in.
+
+## Demo Walkthrough (10 minutes)
+
+After the setup wizard, exercise every core loop:
+
+1. **GL** — Accounts → add a few accounts (4000 Revenue, 5000 Expense,
+   1000 Cash, 2100 AP). New Journal → 2 balanced lines → Post.
+   Trial Balance → grand totals match.
+2. **Procurement** — Vendors → add one. Purchase order → add a line →
+   Submit (note the required approval role from the threshold
+   engine) → Approve → Receive → Inspect (accept all) → Bills →
+   create + Match → Payments → pay it.
+3. **Sales** — Customers → add one (credit limit 20000000). Sales
+   order → Confirm → Deliver → Invoice → Payment → paid.
+4. **Inventory** — check On-Hand: the received stock and the
+   delivered stock netted out at cost.
+5. **Payroll** — Employees → add one → Periods → create this month →
+   Calculate → Approve (pick AP Gaji account) → Disburse (pick cash
+   account).
+6. **Assets** — register a laptop (36-month SL) → run one
+   depreciation batch → Schedule shows the rows.
+7. **Budgeting** — create a budget with a few lines → Approve →
+   Vs-actual at month 12 → Trend REVENUE.
+8. **AI (optional)** — set `APEX_AI_MODE=BYOK` + key, restart, then
+   ask the sidebar: "create a balanced journal for 500000 from Cash
+   to Revenue and post it".
 
 ## Troubleshooting
 

@@ -41,16 +41,23 @@ Core principles:
 
 ```text
 apexledger/
-├── backend/            # FastAPI service
+├── backend/            # FastAPI service (entry point: backend/main.py)
 │   ├── app/            # Application code (API, models, schemas, core)
 │   ├── alembic/        # Migrations: schema + RLS + PL/pgSQL RPCs
-│   ├── tests/          # 50-test suite (business-math assertions)
+│   ├── tests/          # 53-test suite (business-math assertions)
 │   └── cli.py          # Backup / restore / update-check CLI
 ├── frontend/           # React + Vite + TypeScript client
 ├── website/            # Marketing site (static)
-├── docs/               # Public project documentation
+├── docs/               # Project documentation (SETUP, ARCHITECTURE, …)
 └── .github/            # CI workflow, issue & PR templates
 ```
+
+See `docs/SETUP.md` for the full setup walkthrough (env vars, CLI,
+troubleshooting), `docs/ARCHITECTURE.md` for the codebase layout
+and conventions — including where `main.py` lives and why it is
+**not** `app.main:app` — and `docs/USER_FLOWS.md` for end-to-end
+operational flows per module (setup wizard, procure-to-pay,
+order-to-cash, payroll, month-end close, role reference).
 
 ## Modules
 
@@ -126,8 +133,11 @@ and Budgeting (lifecycle with revisions, variance report, trend, productivity).
 
 ## Development
 
+Quick start — for the full guide (env vars, CLI, troubleshooting) see
+`docs/SETUP.md`.
+
 ```bash
-# Backend
+# Backend — run everything from backend/ (entry point is backend/main.py)
 cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
@@ -135,11 +145,11 @@ pip install -e ".[dev]"
 # Database (PostgreSQL 15 running on localhost:5432)
 alembic upgrade head
 
-# Run
+# Run — module is main:app, NOT app.main:app
 uvicorn main:app --reload
 
 # Tests / lint
-python -m pytest tests/ -q
+PATH="$PWD/.venv/bin:$PATH" python -m pytest tests/ -q
 ruff check app tests cli.py
 
 # Frontend

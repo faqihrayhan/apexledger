@@ -18,6 +18,7 @@
 - [ ] Frontend touched: `eslint`, `tsc`, `npm run build` all pass
 - [ ] Migration touched: verified `alembic upgrade head` on a fresh database
 - [ ] Money amounts stay `Decimal` / JSON strings — no floats
+- [ ] New feature: relevant `docs/` file updated (SETUP / ARCHITECTURE / README)
 - [ ] `README.md` updated — or commit message contains `[skip-readme]`
 - [ ] No secrets or credentials committed
 - [ ] Internal PRD / SDLC documents are NOT included (repo docs hygiene)
