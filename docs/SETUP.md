@@ -162,15 +162,48 @@ npm run build
 The test suite recreates a dedicated `apexledger_test` database per
 session and truncates per test — it never touches your dev data.
 
+## Quick Install (one line)
+
+The fastest way to get a working ApexLedger server:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/faqihrayhan/apexledger/main/install.sh | bash
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/faqihrayhan/apexledger/main/install.ps1 | iex
+```
+
+The installer clones the repo to `~/apexledger`, creates the Python venv,
+installs the backend, and runs `apexledger init` (Postgres container +
+database + migrations — zero manual SQL). Then start the server:
+
+```bash
+~/apexledger/backend/.venv/bin/python cli.py serve
+# → http://localhost:8000 (setup wizard on first visit)
+```
+
+Requirements: `git`, Python 3.11+, and Docker (runs the database).
+Re-running the installer is safe — every step is idempotent, an existing
+checkout is updated in place. Environment overrides: `REPO_URL`,
+`INSTALL_DIR`, `BRANCH`.
+
+The sections below are the **manual / advanced** path (no Docker, custom
+Postgres, custom ports) — most users never need them.
+
 ## Desktop App (Tauri)
 
-`frontend/src-tauri/` holds the Tauri v2 shell. Two ways to build the
-installers:
+`frontend/src-tauri/` holds the Tauri v2 shell. Installers are built for
+all platforms — Windows `.msi` + `.exe` (NSIS), macOS `.dmg`, Linux
+`.AppImage`. Two ways to build them:
 
 **A. GitHub Actions (recommended — no local Rust needed).** Repo →
-Actions → *Desktop Build (Tauri)* → *Run workflow*. Default input
-builds the Windows `.msi` only; `windows+linux` / `all` add the other
-platforms. Installers are attached to the run as artifacts (14 days).
+Actions → *Desktop Build (Tauri)* → *Run workflow*. Pick `all` to build
+every platform (Windows `.msi` + `.exe`, macOS `.dmg`, Linux
+`.AppImage`); `windows` (default) keeps the run cheap. Installers are
+attached to the run as artifacts (14 days).
 
 **B. Locally.** Install the Rust toolchain (`rustup`) plus the platform
 extras (Linux also needs `libwebkit2gtk-4.1-dev`), then:

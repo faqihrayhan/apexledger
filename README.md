@@ -121,11 +121,22 @@ requests:
   without updating `README.md` (escape hatch: `[skip-readme]` in the commit
   message).
 
-`.github/workflows/desktop.yml` builds the Tauri desktop installers
-(Windows `.msi`, macOS `.dmg`, Linux `.AppImage`) on **manual dispatch**
-only — Actions → *Desktop Build (Tauri)* → *Run workflow*. Default is the
-Windows MSI (cheapest); pick *windows+linux* or *all* to add the other
-platforms. Artifacts are attached to the workflow run for 14 days.
+`.github/workflows/desktop.yml` builds the Tauri desktop installers on
+**manual dispatch** — Actions → *Desktop Build (Tauri)* → *Run
+workflow*, pick `all` for every platform: Windows `.msi` + `.exe`
+(NSIS), macOS `.dmg`, Linux `.AppImage`. Artifacts are attached to the
+workflow run for 14 days.
+
+Three ways to run ApexLedger (all share the same core):
+
+- **Server (one line)** — `curl -fsSL .../install.sh | bash` (Linux/
+  macOS/WSL) or `irm .../install.ps1 | iex` (Windows). Clones, creates
+  the venv, runs `apexledger init` (Postgres container + migrations),
+  then `apexledger serve`.
+- **Desktop app** — the Tauri installers above; on first launch they
+  ask for the factory server address (e.g. `http://192.168.1.100:8000`).
+- **Browser** — any device on the LAN opens `http://<server-ip>:8000`;
+  no install needed.
 
 ## Frontend Coverage
 

@@ -333,6 +333,59 @@ code {
   line-height: 1.9;
 }
 
+/* Install options (Server / Desktop / Browser) */
+.install-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+  text-align: left;
+}
+
+.install-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.install-card h3 {
+  font-size: 18px;
+  margin: 0;
+  color: var(--fg);
+}
+
+.install-for {
+  color: var(--dim);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.install-card p { margin: 0; font-size: 14px; color: var(--muted); }
+
+.install-card .terminal { margin: 4px 0; }
+
+.install-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.install-note {
+  font-size: 12.5px !important;
+  color: var(--dim) !important;
+  line-height: 1.6;
+}
+
+.install-note a { color: var(--muted); text-decoration: underline; }
+
 /* Footer */
 .footer {
   border-top: 1px solid var(--border);

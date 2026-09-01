@@ -119,18 +119,54 @@
 
   <section class="section section-alt" id="install">
     <h2>Install</h2>
-    <p class="lede-small">Community edition runs entirely on one machine with Docker and Python 3.11+.</p>
-    <div class="terminal">
-      <div class="term-bar"><span></span><span></span><span></span></div>
-      <pre><code>git clone https://github.com/faqihrayhan/apexledger.git
-cd apexledger/backend
-python -m venv .venv &amp;&amp; source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
+    <p class="lede-small">Pick how you want to run ApexLedger. All three use the same core.</p>
 
-python cli.py init     # container + database + migrations
-python cli.py serve    # API on :8000 — open http://localhost:8000/docs</code></pre>
+    <div class="install-grid">
+      <div class="install-card">
+        <h3>Server</h3>
+        <p class="install-for">Linux &middot; macOS &middot; WSL</p>
+        <p>Full stack on one machine: Postgres container, migrations, API server. One line via terminal:</p>
+        <div class="terminal">
+          <div class="term-bar"><span></span><span></span><span></span></div>
+          <pre><code>curl -fsSL https://raw.githubusercontent.com/faqihrayhan/apexledger/main/install.sh | bash</code></pre>
+        </div>
+        <p>Windows (PowerShell):</p>
+        <div class="terminal">
+          <div class="term-bar"><span></span><span></span><span></span></div>
+          <pre><code>irm https://raw.githubusercontent.com/faqihrayhan/apexledger/main/install.ps1 | iex</code></pre>
+        </div>
+        <p class="install-note">Requires git, Python 3.11+, Docker. Then open <code>http://localhost:8000</code>.</p>
+      </div>
+
+      <div class="install-card">
+        <h3>Desktop app</h3>
+        <p class="install-for">Windows &middot; macOS &middot; Linux</p>
+        <p>Native app for employees — install on each PC, then point it at your factory server.</p>
+        <ul class="install-list">
+          <li>Windows — <code>ApexLedger_x.y.z_x64_en-US.msi</code> / <code>-setup.exe</code></li>
+          <li>macOS — <code>ApexLedger_x.y.z_aarch64.dmg</code></li>
+          <li>Linux — <code>ApexLedger_x.y.z_amd64.AppImage</code></li>
+        </ul>
+        <p class="install-note">Downloads: <a href="https://github.com/faqihrayhan/apexledger/actions/workflows/desktop.yml">Actions → Desktop Build</a>. First launch asks for the server address (e.g. <code>http://192.168.1.100:8000</code>).</p>
+      </div>
+
+      <div class="install-card">
+        <h3>Browser</h3>
+        <p class="install-for">Any device on the LAN</p>
+        <p>Zero install for employees: the server machine already serves the web UI.</p>
+        <div class="terminal">
+          <div class="term-bar"><span></span><span></span><span></span></div>
+          <pre><code># on the server machine
+python cli.py serve          # API + UI on :8000
+
+# then, from any PC on the LAN
+http://192.168.1.100:8000</code></pre>
+        </div>
+        <p class="install-note">No app to install — just a browser. Same features, same data.</p>
+      </div>
     </div>
+
+    <p class="lede-small" style="margin-top:32px">Manual / advanced setup (no Docker, custom Postgres): see <a href="https://github.com/faqihrayhan/apexledger/blob/main/docs/SETUP.md">docs/SETUP.md</a>.</p>
   </section>
 
   <footer class="footer">

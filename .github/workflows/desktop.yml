@@ -116,6 +116,8 @@ jobs:
         with:
           name: apexledger-desktop-${{ matrix.rust-target }}
           path: |
+            frontend/src-tauri/target/*/release/bundle/nsis/*.exe
+            frontend/src-tauri/target/release/bundle/nsis/*.exe
             frontend/src-tauri/target/*/release/bundle/msi/*.msi
             frontend/src-tauri/target/release/bundle/msi/*.msi
             frontend/src-tauri/target/*/release/bundle/dmg/*.dmg
